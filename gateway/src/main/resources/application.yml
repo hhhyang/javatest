@@ -1,0 +1,13 @@
+
+server:
+  port: 8081
+
+spring:
+  # spring cloud配置
+  cloud:
+    gateway:
+      routes:
+        - id: path_route #路由的ID
+          uri: http://localhost/user/{id} #匹配后路由地址
+          predicates: # 断言，路径相匹配的进行路由
+            - Path=/user/{id}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package protobuf;
+option java_package = "com.javatest.protobuf";
+option java_outer_classname = "FirstProtobuf";
+message testBuf  {
+  int32 ID = 1;
+  string Url = 2;
+}

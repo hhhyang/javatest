@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.javatest</groupId>
+	<artifactId>root</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>root</name>
+	<description>Demo project for Spring Boot</description>
+
+
+	<contributors>
+		<contributor>
+			<name>yang</name>
+			<email>54740559@qq.com</email>
+			<organization>en</organization>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<url>http://</url>
+		</contributor>
+	</contributors>
+
+	<developers>
+		<developer>
+			<name>yang</name>
+		</developer>
+	</developers>
+
+	<ciManagement>
+		<url>https://</url>
+	</ciManagement>
+
+	<distributionManagement>
+		<downloadUrl>https://</downloadUrl>
+	</distributionManagement>
+
+	<issueManagement>
+		<url>http://</url>
+	</issueManagement>
+
+	<mailingLists>
+		<mailingList>
+			<name>54740559@qq.com</name>
+		</mailingList>
+	</mailingLists>
+
+	<!--
+    <licenses>
+        <license>EPL</license>
+    </licenses>
+    -->
+
+	<modules>
+		<module>antlr</module>
+		<module>core</module>
+		<module>gateway</module>
+		<module>general</module>
+		<module>gremlin-client</module>
+		<module>httpclient</module>
+		<module>webclient</module>
+		<module>webflux</module>
+	</modules>
+
+</project>
