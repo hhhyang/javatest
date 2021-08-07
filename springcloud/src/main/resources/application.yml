@@ -1,0 +1,27 @@
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: spring-cloud-test
+
+eureka:
+  client:
+    # 集群所属区域
+    region: cnlab-region
+    prefer-same-zone-eureka: true
+    # 是否开启心跳
+    healthcheck:
+      enabled: true
+
+  instance:
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}@${release.version}
+    # 续约更新时间间隔 (默认30秒)
+    lease-expiration-duration-in-seconds: 15
+    # 续约到期事件 (默认90秒)
+    lease-renewal-interval-in-seconds: 10
+    prefer-ip-address: true
+    metadata-map:
+      # 所在分区，如:HD、HB、HN、Gi、CNLAB
+      zone: CNLAB

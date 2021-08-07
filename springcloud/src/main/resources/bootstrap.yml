@@ -1,0 +1,28 @@
+release:
+  version: 1.3.0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: 
+
+spring:
+  cloud:
+    inetutils:
+      ignored-interfaces:
+        - lo
+      preferred-networks:
+        - 172.*
+
+# 开通安全认证
+management:
+  security:
+    enabled: false
+    roles: USER
+  info:
+    git:
+      enabled: true
+      mode: simple
+  endpoints:
+    web:
+      base-path: /

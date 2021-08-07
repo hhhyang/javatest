@@ -1,13 +1,9 @@
-package com.baidu.sdn.topo.analyzer.core.domain.vo;
+package com.javatest.general.api;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- *
- *
- * @author yangshengbing@baidu.com
- */
+
 @Data
 @NoArgsConstructor
 public class ApiExceptionResponse extends ApiResponse {

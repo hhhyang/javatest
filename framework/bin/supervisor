@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+cd $(dirname $(dirname $0)) || exit 1
+
+readonly DIR=`pwd`
+
+if [ ! -f ${DIR}/bin/env.sh ] ; then
+    echo "can not find file env.sh! exit process!" >> log/start.log
+    exit 1
+fi
+
+source ${DIR}/bin/env.sh
+
+function monitor() {
+    while true;
+    do
+        ${START_CMD} >> ${LOG_DIR}/start.log
+        sleep 10
+    done
+    exit 1
+}
+
+if [ ! -d ${LOG_DIR} ] ; then
+    mkdir ${LOG_DIR}
+fi
+
+printf "%d" $$ > pid_supervisor
+monitor $@
+

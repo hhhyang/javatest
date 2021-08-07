@@ -1,12 +1,8 @@
-package com.baidu.sdn.topo.analyzer.core.domain.vo;
+package com.javatest.general.api;
 
 import lombok.Data;
 
-/**
- *
- *
- * @author yangshengbing@baidu.com
- */
+
 @Data
 public class ApiException extends RuntimeException {
 

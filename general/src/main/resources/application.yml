@@ -1,1 +1,53 @@
+server:
+  port: 8083
+
+spel:
+  test:
+    config-value: a,b,c
+
+sdn:
+  kafka:
+    device:
+      topics: wwww
+      # 指定kafka 代理地址，可以多个
+      bootstrap-servers-list:
+        - a,b,c
+        - d,e,f
+        - a,b,c
+        - d,e,f
+      consumer:
+        # 指定默认消费者group id
+        group-id: group-topo-service-v3
+        enable-auto-commit: false
+        auto-offset-reset: latest
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        max-poll-records: 6
+        max-poll-interval-ms: 600000
+      listener:
+        # 指定listener 容器中的线程数，用于提高并发量
+        concurrency: 2
+        ack-mode: manual
+    link:
+      topics: ffff
+      # 指定kafka 代理地址，可以多个
+      bootstrap-servers-list:
+        - a,b,c
+        - d,e,f
+        - a,b,c
+        - d,e,f
+      consumer:
+        # 指定默认消费者group id
+        group-id: group-topo-service-v3-2
+        enable-auto-commit: false
+        auto-offset-reset: latest
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        max-poll-records: 24
+        max-poll-interval-ms: 600000
+      listener:
+        # 指定listener 容器中的线程数，用于提高并发量
+        concurrency: 2
+        ack-mode: manual
+
 

@@ -1,12 +1,8 @@
-package com.baidu.sdn.topo.analyzer.core.domain.vo;
+package com.javatest.general.api;
 
 import org.springframework.http.HttpStatus;
 
-/**
- *
- *
- * @author yangshengbing@baidu.com
- */
+
 public enum ApiStatusCode {
 
     OK("OK", HttpStatus.OK),

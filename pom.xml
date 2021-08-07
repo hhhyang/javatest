@@ -63,6 +63,12 @@
 		<module>httpclient</module>
 		<module>webclient</module>
 		<module>webflux</module>
-	</modules>
+        <module>springcloud</module>
+		<module>eurekaclient</module>
+        <module>testa</module>
+        <module>testb</module>
+		<module>gatewayr</module>
+        <module>framework</module>
+    </modules>
 
 </project>

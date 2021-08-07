@@ -1,0 +1,16 @@
+
+spring:
+  cloud:
+    inetutils:
+      # 忽略loopback接口
+      ignored-interfaces:
+        - lo
+      # 优先匹配的接口ip，表达式可以是正则表达式或前缀
+      preferred-networks:
+        - ^172\..*
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+        exclude: threaddump,heapdump

@@ -1,0 +1,50 @@
+
+server:
+  port: 8001
+
+spring:
+  application:
+    name: eureka-server-test
+
+eureka:
+  dashboard:
+    # 使能eureka ui
+    enabled: true
+    # eureka ui路径
+    path: /
+  server:
+    # 关闭自我保护
+    enable-self-preservation: false
+    # 清理间隔（单位毫秒，默认是 60*1000）, 定期删除状态为down的实例
+    eviction-interval-timer-in-ms: 10000
+    # 节点之间的复制是否应批处理以提高网络效率 （默认：false）
+    batch-replication: false
+    # 发送复制数据请求中，是否总是压缩
+    enable-replicated-request-compression: false
+    # 允许备份到备份池的最大复制事件数量，可以根据内存大小，超时和复制流量，来设置此值得大小（默认是 10000）
+    max-elements-in-peer-replication-pool: 20000
+    max-elements-in-status-replication-pool: 20000
+    # 服务注册中心相互复制数据的最大线程数量（默认是 20、1）
+    max-threads-for-peer-replication: 20
+    max-threads-for-status-replication: 10
+    # 节点读超时时长 (单位毫秒，默认是 200)
+    peer-node-read-timeout-ms: 500
+  client:
+    # 所属区域，相同的区域构成一个集群，eureka server只会在相同区域内复制数据
+    region: sdn-region-test
+    serviceUrl:
+      defaultZone: http://172.18.176.165:${server.port}/eureka
+    prefer-same-zone-eureka: true
+    healthcheck:
+      enabled: true
+    # 从eureka server拉取注册表
+    fetch-registry: false
+    # 向eureka server注册自己
+    register-with-eureka: false
+  instance:
+    # 使用IP地址而不是主机名作为实例访问URL。
+    # 主要是考虑到如下因素：使用主机名，增加了对DNS系统的依赖，并且运维过程中主机名可能经常变化。
+    prefer-ip-address: true
+    metadata-map:
+      zone: server-test
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}

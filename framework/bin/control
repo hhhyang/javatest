@@ -1,0 +1,335 @@
+#!/usr/bin/env bash
+
+function info() {
+    datetime=`date "+%Y-%m-%d %H:%M:%S |"`
+    echo -e "\033[1;94m${datetime} INFO |\033[0m\033[0;94m $@ \033[0m"
+}
+
+function error() {
+    datetime=`date "+%Y-%m-%d %H:%M:%S |"`
+    echo -e "\033[1;91m${datetime} ERROR |\033[0m\033[1;91m $@ \033[0m" >&2
+}
+
+readonly DIR="$(cd $(dirname $(dirname $0)); pwd)"
+
+if [ ! -f ${DIR}/bin/env.sh ] ; then
+    error "can not find file env.sh! exit process!"
+    exit 1
+fi
+
+source ${DIR}/bin/env.sh
+
+if [ x"${HEALTH_KEY_WORDS}" = x ] ; then
+    error "application detecting key words must be defined! exit process!"
+    exit 1
+fi
+
+
+function find_jdk() {
+
+    target_jdk=""
+
+    max_build_version=0
+    for file in $(ls ${JDK_DIR})
+    do
+        if [ -d $(readlink ${file}) ] && [[ ${file} == ${JDK_VERSION}* ]] ; then
+            build_version=${file##${JDK_VERSION}_}
+            if [ "${build_version}" -gt "${max_build_version}" ] ; then
+                target_jdk=${file}
+                max_build_version=${build_version}
+            fi
+        fi
+    done
+
+    return 0
+}
+
+
+function check_env() {
+    info "check environment......"
+
+    JAVA_VERSION=$(java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $3 }')
+    if [[ ${JAVA_VERSION} == 1.8.0* ]] ; then
+        info "check JDK version successfully, jdk version: ${JAVA_VERSION}"
+        return 0
+    fi
+
+    find_jdk
+
+    if [ -z "${target_jdk}" ] ; then
+        if [ x"${DOWNLOAD_JDK}" = x"true" ]; then
+            info "downloading jdk package from repository......"
+
+            rm -rf ${DOWNLOAD_JDK_DIR}
+            mkdir -p ${DOWNLOAD_JDK_DIR}
+            curr_pwd=`pwd`
+            cd ${DOWNLOAD_JDK_DIR}
+            # Get Thirdparty Library (JDK1.8, Maven3.5.0 and Custom settings.xml)
+            # wget
+            tar -xzf ${DOWNLOAD_JDK_DIR}/output/${DOWNLOAD_JDK_PKG_NAME} -C ${JDK_DIR}
+            rm -rf ${DOWNLOAD_JDK_DIR}
+
+            cd ${curr_pwd}
+            find_jdk
+        fi
+
+        if [ -z "${target_jdk}" ] ; then
+            error "check environment failed, do not exist required ${JDK_VERSION} in dedicated directory ${JDK_DIR}"
+            return 1
+        fi
+    fi
+
+    info "setup JDK 1.8.0 environment......"
+    export JAVA_HOME=${JDK_DIR}/${target_jdk}
+    export JRE_HOME=${JAVA_HOME}/jre
+    export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+    export PATH=${JAVA_HOME}/bin:${PATH}
+
+    return 0
+}
+
+function check_running() {
+    info "check application whether in running......"
+    ps -ef | grep "${HEALTH_KEY_WORDS}" | grep -v 'grep' | grep -vq "${SUPERVISOR}"
+    return $?
+}
+
+function help_info() {
+    info "usage: ${0} <start | stop | restart | shutdown | status | install | help>"
+}
+
+
+function kill_process() {
+
+    info "kill processes......"
+
+    spids=$(ps -eo pid,command | grep "${SUPERVISOR}" | grep -v 'grep'| awk '{print $1}')
+    for spid in ${spids}
+    do
+        kill -9 ${spid}
+        if [ $? -ne 0 ] ; then
+            error "kill supervisor process(pid=${spid}) failed"
+        else
+            info "kill supervisor process(pid=${spid}) successfully"
+        fi
+    done
+
+    sleep 2
+
+    pids=$(ps -eo pid,command | grep "${HEALTH_KEY_WORDS}" | grep -v 'grep'| awk '{print $1}')
+    for pid in ${pids}
+    do
+        kill -9 ${pid}
+        if [ $? -ne 0 ] ; then
+            error "kill process(pid=${pid}) failed"
+        else
+            info "kill process(pid=${pid}) successfully"
+        fi
+    done
+
+
+}
+
+function term_process() {
+
+    info "terminate processes......"
+
+    spids=$(ps -eo pid,command | grep "${SUPERVISOR}" | grep -v 'grep'| awk '{print $1}')
+    for spid in ${spids}
+    do
+        kill -SIGTERM ${spid}
+        if [ $? -ne 0 ] ; then
+            error "terminate supervisor process(pid=${spid}) failed"
+        else
+            info "terminate supervisor process(pid=${spid}) successfully"
+        fi
+    done
+
+    sleep 2
+
+    pids=$(ps -eo pid,command | grep "${HEALTH_KEY_WORDS}" | grep -v 'grep'| awk '{print $1}')
+    for pid in ${pids}
+    do
+        kill -SIGTERM ${pid}
+        if [ $? -ne 0 ];then
+            error "terminate process(pid=${pid}) failed"
+        else
+            info "terminate process(pid=${pid}) successfully"
+        fi
+    done
+
+}
+
+
+function start()
+{
+
+    if [ x"${START_CMD}" = x ] ; then
+        error "application start command must be defined! exit starting!"
+        exit 1
+    fi
+
+    install
+
+    info "start application......"
+    check_running
+    if [ $? -eq 0 ]; then
+        info "application is running"
+        return 0
+    fi
+
+    check_env
+    if [ $? -ne 0 ]; then
+        error "check environment failed"
+        return 1
+    fi
+
+    # start application
+    info "exec application process......"
+    if [ "x${SUPERVISOR}" = "x" ] ; then
+        exec ${START_CMD} >> ${LOG_DIR}/start.log
+    else
+        (setsid ${SUPERVISOR} >/dev/null 2>&1 &)
+    fi
+
+    sleep 5
+    for i in {1..10}
+    do
+        check_running
+        if [ $? -eq 0 ];then
+            break
+        else
+            if [ ${i} -eq 5 ];then
+                error "start application failed"
+                return 1
+            fi
+
+            sleep 10
+        fi
+    done
+
+    info "start application successfully"
+    return 0
+}
+
+function stop()
+{
+    info "stop application......"
+    check_running
+    if [ $? -ne 0 ]; then
+        info "application is not running"
+        return 0
+    fi
+
+    for i in {1..10}
+    do
+        kill_process
+        sleep 1
+        check_running
+        if [ $? -ne 0 ]; then
+            info "stop application successfully"
+            return 0
+        fi
+    done
+
+    error "stop application failed"
+    return 1
+}
+
+function restart() {
+    stop
+    if [ $? -ne 0 ] ; then
+        return 1
+    fi
+
+    sleep 2
+    start
+}
+
+function shutdown() {
+
+    info "shutdown application......"
+    check_running
+    if [ $? -ne 0 ]; then
+        info "application is not running"
+        return 0
+    fi
+
+    for i in {1..10}
+    do
+        term_process
+        sleep 1
+        check_running
+        if [ $? -ne 0 ]; then
+            info "shutdown application successfully"
+            return 0
+        fi
+    done
+
+    error "shutdown application failed"
+    return 1
+}
+
+function status() {
+
+    info "get application status......"
+    check_running
+    if [ $? -eq 0 ]; then
+        info 'application is running'
+        return 0
+    else
+        info 'application is not running'
+        return 1
+    fi
+}
+
+function install() {
+
+    if [ "$(type -t install_internal)" == function ]; then
+        info "install appllication package......"
+        install_internal
+    fi
+
+}
+
+function main() {
+
+    cd ${HOME_DIR}
+
+    case "$1" in
+        start)
+            start
+            exit $?
+            ;;
+        stop)
+            stop
+            exit $?
+            ;;
+        restart)
+            restart
+            exit $?
+            ;;
+        shutdown)
+            shutdown
+            exit $?
+            ;;
+        status)
+            status
+            exit $?
+            ;;
+        install)
+            install
+            exit $?
+            ;;
+        help)
+            help_info
+            exit $?
+            ;;
+        *)
+            help_info
+            exit 1
+            ;;
+    esac
+}
+
+main $@

@@ -18,7 +18,8 @@ public class RouterConfig {
     @Bean
     @RouterOperation(beanClass = TestHandler.class, beanMethod = "hello")
     public RouterFunction<ServerResponse> monoRouterFunction(TestHandler testHandler){
-        return RouterFunctions.route(GET("/api/user").and(accept(MediaType.APPLICATION_JSON)),testHandler::hello);
+        return RouterFunctions.route(GET("/api/user").and(accept(MediaType.APPLICATION_JSON)),testHandler::hello)
+                .andRoute(GET("/api/user2"),testHandler::hello2);
     }
 
 }

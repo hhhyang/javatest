@@ -1,10 +1,6 @@
-package com.baidu.sdn.topo.analyzer.core.domain.vo;
+package com.javatest.general.api;
 
-/**
- *
- *
- * @author yangshengbing@baidu.com
- */
+
 public class ApiConstants {
 
     public static final String FILTER_TYPE = "filter-type";

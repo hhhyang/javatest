@@ -1,0 +1,26 @@
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://10.114.37.44:8002/eureka/,http://10.162.24.155:8002/eureka/
+
+spring:
+  cloud:
+    inetutils:
+      ignored-interfaces:
+        - lo
+      preferred-networks:
+        - 172.*
+
+# 开通安全认证
+management:
+  security:
+    enabled: false
+    roles: USER
+  info:
+    git:
+      enabled: true
+      mode: simple
+  endpoints:
+    web:
+      base-path: /

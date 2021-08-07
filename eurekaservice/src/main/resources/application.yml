@@ -1,0 +1,130 @@
+
+server:
+  port: 8002
+
+spring:
+  application:
+    # application name配置需要放在application.yml文件中
+    name: eureka-service-test
+
+eureka:
+  client:
+    # 所属区域，相同的区域构成一个集群，eureka server只会在相同区域内复制数据
+    region: sdn-region-test
+    prefer-same-zone-eureka: true
+    healthcheck:
+      # 如果healthcheck使能，eureka server会调用client actuator的/health端点确定client的状态，
+      # 否则只会根据client周期租借来确定client的状态
+      enabled: true
+    # eureka server列表，会先向第一个server进行注册，失败后尝试第二个，依次类推
+    service-url:
+      defaultZone: http://172.18.176.165:8001/eureka
+    # 使能client
+    enabled: true
+    # 是否拉取注册表
+    fetch-registry: true
+    # 拉取注册表间隔
+    registry-fetch-interval-seconds: 30
+    register-with-eureka: true
+    eureka-server-connect-timeout-seconds: 30
+    eureka-server-read-timeout-seconds: 8
+    filter-only-up-instances: true
+    eureka-connection-idle-timeout-seconds: 30
+    eureka-server-total-connections-per-host: 50
+    eureka-server-total-connections: 200
+  instance:
+    # 服务注册的hostname字段为对应的ip地址，而不是hostname。
+    # 主要是考虑到如下因素：使用主机名，增加了对DNS系统的依赖，并且运维过程中主机名可能经常变化。
+    prefer-ip-address: true
+    metadata-map:
+      zone: HN
+    instance-id: ${spring.cloud.client.hostname}:${spring.cloud.client.ip-address}:${server.port}
+    # 显式指定实例的ip地址
+    ip-address: 172.18.176.165
+    # 显式指定实例的hostname
+    hostname: abc
+    # 显示指定注册的appname，默认为${spring.application.name}
+    #appname: eureka-service-test
+    # 实例的心跳时间间隔，调用 PUT /eureka/apps/{app id}/{instance id}?status={status}
+    lease-renewal-interval-in-seconds: 30000
+    # 实例心跳超时时间
+    lease-expiration-duration-in-seconds: 90000
+    # status-page-url:
+    # home-page-url:
+    # health-check-url:
+
+# resilience 配置
+resilience4j:
+  circuitbreaker:
+    instances:
+      # circuitbreaker的名字，自定义
+      backendA:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 50s
+      backendB:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: TIME_BASED
+        minimumNumberOfCalls: 20
+        waitDurationInOpenState: 50s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        # recordFailurePredicate: io.github.robwin.exception.RecordFailurePredicate
+  retry:
+    instances:
+      backendA:
+        maxRetryAttempts: 3
+        waitDuration: 10s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+        #ignoreExceptions:
+        #  - io.github.robwin.exception.BusinessException
+      backendB:
+        maxRetryAttempts: 3
+        waitDuration: 10s
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+        #ignoreExceptions:
+        #  - io.github.robwin.exception.BusinessException
+  bulkhead:
+    instances:
+      backendA:
+        maxConcurrentCalls: 10
+      backendB:
+        maxWaitDuration: 10ms
+        maxConcurrentCalls: 20
+  thread-pool-bulkhead:
+    instances:
+      backendC:
+        maxThreadPoolSize: 1
+        coreThreadPoolSize: 1
+        queueCapacity: 1
+  ratelimiter:
+    instances:
+      backendA:
+        limitForPeriod: 3
+        limitRefreshPeriod: 10s
+        timeoutDuration: 0
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 100
+      backendB:
+        limitForPeriod: 6
+        limitRefreshPeriod: 500ms
+        timeoutDuration: 3s
+  timelimiter:
+    instances:
+      backendA:
+        timeoutDuration: 2s
+        cancelRunningFuture: true
+      backendB:
+        timeoutDuration: 1s
+        cancelRunningFuture: true
+

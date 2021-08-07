@@ -1,15 +1,11 @@
-package com.baidu.sdn.topo.analyzer.core.domain.vo;
+package com.javatest.general.api;
 
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-/**
- *
- *
- * @author yangshengbing@baidu.com
- */
+
 public class ApiUtils {
 
 

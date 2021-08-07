@@ -1,0 +1,125 @@
+
+# 对外服务端口
+server:
+  port: 8888
+
+# 使用的日志配置文件
+logging:
+  config: classpath:logback-spring.xml
+
+spring:
+  application:
+    name: <$SPRING_APP_NAME$>
+  datasource:
+    url: jdbc:mysql://xxxx?characterEncoding=utf8
+    username: xxx
+    password: xxx
+    driver-class-name: com.mysql.jdbc.Driver
+    hikari:
+      max-lifetime: 600000
+  redis:
+    pool:
+      max-total: 32
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
+    mode: <$REDIS_MODE$>
+    database: 0
+    host: <$REDIS_SERVER$>
+    port: 6379
+    # password: xxx
+    timeout: 3000
+    sentinel:
+      master: mymaster
+      nodes: <$REDIS_SENTINEL_SERVERS$>
+
+# 安全配置
+security:
+  jwt:
+    secret: q03oQVAPLx9kJQpm795XQTlPMOmh84P2
+
+#
+# janusgraph 配置
+#
+hugegraph:
+  url: <$HUGEGRAPH_URL$>
+  graph: hugegraph
+
+# 各模块自定义配置
+sdn:
+  kafka:
+    test1:
+      topics: <$KAFKA_DEVICE_TOPICS$>
+      # 指定kafka 代理地址，可以多个
+      bootstrap-servers-list:
+        - <$KAFAKA_BOOTSTRAP_SERVERS_HB$>
+        - <$KAFAKA_BOOTSTRAP_SERVERS_HD$>
+        - <$KAFAKA_BOOTSTRAP_SERVERS_HN$>
+        - <$KAFAKA_BOOTSTRAP_SERVERS_GI$>
+      consumer:
+        # 指定默认消费者group id
+        group-id: group-tmn
+        enable-auto-commit: false
+        auto-offset-reset: latest
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+        # max-poll-records: 2
+        max-poll-interval-ms: 600000
+      listener:
+        # 指定listener 容器中的线程数，用于提高并发量
+        concurrency: 6
+        ack-mode: manual
+    test2:
+      topics: <$KAFKA_INET_DISCOVERY_TOPICS$>
+      bootstrap-servers-list:
+        - <$KAFAKA_BOOTSTRAP_SERVERS_HB$>
+        - <$KAFAKA_BOOTSTRAP_SERVERS_HD$>
+        - <$KAFAKA_BOOTSTRAP_SERVERS_HN$>
+        - <$KAFAKA_BOOTSTRAP_SERVERS_GI$>
+      consumer:
+        group-id: group-tmid
+        enable-auto-commit: false
+        auto-offset-reset: latest
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+        # max-poll-records: 6
+        max-poll-interval-ms: 600000
+      listener:
+        concurrency: 1
+        ack-mode: manual
+
+eureka:
+  client:
+    # 集群所属区域
+    region: <$EUREKA_CLIENT_REGION$>
+    prefer-same-zone-eureka: true
+    # 是否开启心跳
+    healthcheck:
+      enabled: true
+
+  instance:
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}@${release.version}
+    # 续约更新时间间隔 (默认30秒)
+    lease-expiration-duration-in-seconds: 15
+    # 续约到期事件 (默认90秒)
+    lease-renewal-interval-in-seconds: 10
+    prefer-ip-address: true
+    metadata-map:
+      # 所在分区，如:HD、HB、HN、Gi、CNLAB
+      zone: <$EUREKA_CLIENT_ZONE$>
+
+#
+# 熔断器、路由转发超时参数设置。
+#
+# resilience 配置
+resilience4j:
+  # 限流配置
+  ratelimiter:
+    instances:
+      apiTotalLimit:
+        # 限速请求个数
+        limitForPeriod: 30
+        # 测量周期, 单位秒
+        limitRefreshPeriod: 1
+        # 线程获取limiter权限timeout，单位ms
+        timeoutDuration: 5000

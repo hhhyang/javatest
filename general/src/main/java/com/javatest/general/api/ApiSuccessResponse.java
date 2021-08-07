@@ -1,36 +1,38 @@
-package com.baidu.sdn.topo.analyzer.core.domain.vo;
+package com.javatest.general.api;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
-/**
- *
- *
- * @author yangshengbing@baidu.com
- */
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
-public class ApiSuccessResponse extends ApiResponse {
+@Slf4j
+public class ApiSuccessResponse<T extends ApiResponseData> extends ApiResponse {
 
-    private ApiResponseData data;
+    private T data;
 
-    public ApiSuccessResponse(final ApiResponseData data) {
+    public ApiSuccessResponse(final T data) {
         super(ApiStatusCode.OK.code, "success");
         this.data = data;
     }
 
-    public ApiSuccessResponse(final String message, final ApiResponseData data) {
+    public ApiSuccessResponse(final String message, final T data) {
         super(ApiStatusCode.OK.code, message);
         this.data = data;
+
+        log.info("hee");
     }
 
-    public <T> ApiSuccessResponse(final String message, final T data) {
+    public <U> ApiSuccessResponse(final String message, final U data) {
         super(ApiStatusCode.OK.code, message);
-        this.data = new ApiResponseData<>(data);
+        this.data = (T) new ApiResponseData<>(data);
+
+        log.info("ttt====");
     }
 
 }

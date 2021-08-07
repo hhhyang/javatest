@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# log
+JVM_OPTS="$JVM_OPTS -XX:+PrintGCDetails"
+JVM_OPTS="$JVM_OPTS -XX:+PrintGCDateStamps"
+JVM_OPTS="$JVM_OPTS -XX:+PrintCommandLineFlags"
+JVM_OPTS="$JVM_OPTS -XX:+HeapDumpOnOutOfMemoryError"
+JVM_OPTS="$JVM_OPTS -XX:HeapDumpPath=${LOG_DIR}/topo-service-`date +%s`-pid$$.hprof"
+JVM_OPTS="$JVM_OPTS -Xloggc:${LOG_DIR}/topo-service-gc.log"
+JVM_OPTS="$JVM_OPTS -XX:ErrorFile=${LOG_DIR}/topo-service-`date +%s`-pid%p.log"
+JVM_OPTS="$JVM_OPTS -XX:+UseGCLogFileRotation"
+JVM_OPTS="$JVM_OPTS -XX:NumberOfGCLogFiles=10"
+JVM_OPTS="$JVM_OPTS -XX:GCLogFileSize=50M"
+JVM_OPTS="$JVM_OPTS -XX:+PrintTenuringDistribution"
+JVM_OPTS="$JVM_OPTS -XX:+PrintPromotionFailure"
+JVM_OPTS="$JVM_OPTS -XX:+PrintGCApplicationStoppedTime"
+JVM_OPTS="$JVM_OPTS -XX:+PrintHeapAtGC"
+# JVM_OPTS="$JVM_OPTS -XX:+UnlockCommercialFeatures -XX:+FlightRecorder"
+
+# memory
+JVM_OPTS="$JVM_OPTS -Xms1g"
+JVM_OPTS="$JVM_OPTS -Xmx1g"
+JVM_OPTS="$JVM_OPTS -Xmn400m"
+JVM_OPTS="$JVM_OPTS -XX:+UseCompressedOops"
+
+# gc collector
+JVM_OPTS="$JVM_OPTS -XX:+UseParNewGC"
+JVM_OPTS="$JVM_OPTS -XX:+UseConcMarkSweepGC"
+JVM_OPTS="$JVM_OPTS -XX:+UseCMSInitiatingOccupancyOnly"
+JVM_OPTS="$JVM_OPTS -XX:CMSInitiatingOccupancyFraction=75"
+JVM_OPTS="$JVM_OPTS -XX:+ExplicitGCInvokesConcurrent"

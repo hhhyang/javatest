@@ -1,0 +1,43 @@
+
+release:
+  version: ==VERSION==
+
+eureka:
+  client:
+    service-url:
+      defaultZone: <$EUREKA_SERVER_URL$>
+
+spring:
+  cloud:
+    inetutils:
+      ignored-interfaces:
+        - lo
+      preferred-networks:
+        - ^10\..*
+
+# 开通安全认证
+management:
+  security:
+    enabled: true
+    roles: USER
+  info:
+    git:
+      enabled: true
+      mode: simple
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+        exclude: threaddump,heapdump
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# springdoc配置
+springdoc:
+  # 不导入的接口
+  paths-to-exclude: /error
+  swagger-ui:
+    path: /webui.html
+  api-docs:
+    path: /api-docs
